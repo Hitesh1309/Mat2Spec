@@ -232,6 +232,19 @@ class GNN(torch.nn.Module):
 
         return y
 
+class CNN(torch.nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size=3, stride=1, padding=1):
+        super(CNN, self).__init__()
+
+        self.conv1 = nn.Conv1d(in_channels, out_channels, kernel_size, stride, padding)
+        self.conv2 = nn.Conv1d(out_channels, out_channels, kernel_size, stride, padding)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = F.max_pool1d(x, 2)  # Max pooling over a kernel size of 2
+        return x
+
 class Mat2Spec(nn.Module):
     def __init__(self, args, NORMALIZER):
         super(Mat2Spec, self).__init__()
@@ -239,7 +252,8 @@ class Mat2Spec(nn.Module):
         number_neurons = args.num_neurons
         number_layers = args.num_layers
         concat_comp = args.concat_comp
-        self.graph_encoder = GNN(n_heads, neurons=number_neurons, nl=number_layers, concat_comp=concat_comp)
+        # self.graph_encoder = GNN(n_heads, neurons=number_neurons, nl=number_layers, concat_comp=concat_comp)
+        self.cnn = CNN(in_channels=92, out_channels=64)
 
         self.loss_type = args.Mat2Spec_loss_type
         self.NORMALIZER = NORMALIZER
@@ -385,7 +399,9 @@ class Mat2Spec(nn.Module):
 
     def forward(self, data):
         label = data.y
-        feature = self.graph_encoder(data)
+        # feature = self.graph_encoder(data)
+        x = data.x
+        x = self.cnn(x.unsqueeze(0))
 
         fe_output = self.label_forward(label, feature)
         label_emb = fe_output['label_emb'] # [bs, emb_size]
