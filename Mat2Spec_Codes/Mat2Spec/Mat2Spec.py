@@ -253,7 +253,7 @@ class Mat2Spec(nn.Module):
         number_layers = args.num_layers
         concat_comp = args.concat_comp
         # self.graph_encoder = GNN(n_heads, neurons=number_neurons, nl=number_layers, concat_comp=concat_comp)
-        self.cnn = CNN(in_channels=92, out_channels=64)
+        self.cnn = CNN(in_channels=92, out_channels=128)
 
         self.loss_type = args.Mat2Spec_loss_type
         self.NORMALIZER = NORMALIZER
